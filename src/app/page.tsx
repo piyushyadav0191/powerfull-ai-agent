@@ -1,101 +1,131 @@
-import Image from "next/image";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import Link from "next/link";
+
+const features = [
+  {
+    title: "Fast",
+    description:
+      "Real-time streamed responses from AI agents, ensuring you get the most up-to-date information and insights.",
+    icon: (
+      <svg
+        className="w-6 h-6 text-blue-600"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M13 10V3L4 14h7v7l9-11h-7z"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: "Smart",
+    description:
+      "Intelligent task management with AI-powered suggestions and automated workflows.",
+    icon: (
+      <svg
+        className="w-6 h-6 text-blue-600"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M12 15v2m-6 4h6m2 0a2 2 0 104 0v-4a2 2 0 10-4 0m-6 8a2 2 0 104 0v-4a2 2 0 10-4 0"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: "Efficient",
+    description: "Streamlined workflows with AI-driven task completion .",
+    icon: (
+      <svg
+        className="w-6 h-6 text-blue-600"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M12 15v2m-6 4h6m2 0a2 2 0 104 0v-4a2 2 0 10-4 0m-6 8a2 2 0 104 0v-4a2 2 0 10-4 0"
+        />
+      </svg>
+    ),
+  },
+];
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="min-h-screen bg-gradient-to-b from-white to-gray-50/50 flex items-center justify-center">
+      <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_bottom,rgba(255,255,255,0.15),rgba(255,255,255,0))]" />
+      <section className="w-full px-4 py-9 mx-auto max-w-7xl sm:px-8 lg:px-8 flex flex-col items-center space-y-10 text-center">
+        <header className="space-y-6">
+          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+            Your AI-Powered <span className="text-blue-600">Productivity</span>{" "}
+            Partner
+          </h1>
+          <p className="text-xl text-gray-500">
+            Streamline your workflow with our AI-powered tools.
+          </p>
+        </header>
+        <SignedIn>
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Get Started
+          </Link>
+        </SignedIn>
+        <SignedOut>
+          <SignInButton
+            mode="modal"
+            fallbackRedirectUrl={"/dashboard"}
+            forceRedirectUrl={"/dashboard"}
           >
-            Read our docs
-          </a>
+            <button className="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 active:scale-95">
+              <span>Get Started</span>
+              <svg
+                className="ml-2 -mr-1 w-5 h-5"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </SignInButton>
+        </SignedOut>
+        {/* features grid */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature, index) => (
+            <div
+              key={index}
+              className="flex flex-col items-start justify-start p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+            >
+              <div className="mb-4">{feature.icon}</div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {feature.title}
+              </h3>
+              <p className="mt-2 text-sm text-gray-500">
+                {feature.description}
+              </p>
+            </div>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+    </main>
   );
 }
