@@ -3,6 +3,8 @@ import { getConvexClient } from "@/lib/convex";
 import { ChatRequestBody, StreamMessage, StreamMessageType } from "@/lib/type";
 import { auth } from "@clerk/nextjs/server";
 import { api } from "../../../../../convex/_generated/api";
+import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
+import { submitQuestion } from "@/lib/langgraph";
 
 function sendSSEMessage(
   writer: WritableStreamDefaultWriter<Uint8Array>,
@@ -48,6 +50,59 @@ export async function POST(req: Request) {
           chatId,
           content: newMessage,
         });
+
+        const langchainMessages = [
+          ...messages.map((msg) =>
+            msg.role === "user"
+              ? new HumanMessage(msg.content)
+              : new AIMessage(msg.content)
+          ),
+          new HumanMessage(newMessage),
+        ];
+
+        try {
+          const eventStream = await submitQuestion(langchainMessages, chatId);
+
+          for await (const event of eventStream) {
+            if (event.event === "on_chat_model_stream") {
+              const token = event.data.chunk;
+
+              if (token) {
+                const text = token.content.at(0)?.["text"];
+                if (text) {
+                  await sendSSEMessage(writer, {
+                    type: StreamMessageType.Token,
+                    token: text,
+                  });
+                }
+              }
+            } else if (event.event === "on_tool_start") {
+                await sendSSEMessage(writer, {
+                    type: StreamMessageType.ToolStart,
+                    tool: event.name || "unknown",
+                    input: event.data.input,
+                })
+            } else if (event.event === "on_tool_end") {
+                const toolMsg = new ToolMessage(event.data.output)
+                await sendSSEMessage(writer, {
+                    type: StreamMessageType.ToolEnd,
+                    tool: toolMsg.lc_kwargs.name || "unknown",
+                    output: event.data.output,
+                })
+            }
+
+            await sendSSEMessage(writer, { type: StreamMessageType.Done });
+          }
+        } catch (streamError) {
+          console.error("Stream error", streamError);
+          await sendSSEMessage(writer, {
+            type: StreamMessageType.Error,
+            error:
+              streamError instanceof Error
+                ? streamError.message
+                : "Stream processing failed",
+          });
+        }
       } catch (error) {
         return new Response(JSON.stringify({ error: error }), { status: 500 });
       }

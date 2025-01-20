@@ -20,7 +20,6 @@ import {
   ChatPromptTemplate,
   MessagesPlaceholder,
 } from "@langchain/core/prompts";
-import { threadId } from "worker_threads";
 
 const trimmer = trimMessages({
   maxTokens: 10,
