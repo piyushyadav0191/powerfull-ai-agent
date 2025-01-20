@@ -77,18 +77,18 @@ export async function POST(req: Request) {
                 }
               }
             } else if (event.event === "on_tool_start") {
-                await sendSSEMessage(writer, {
-                    type: StreamMessageType.ToolStart,
-                    tool: event.name || "unknown",
-                    input: event.data.input,
-                })
+              await sendSSEMessage(writer, {
+                type: StreamMessageType.ToolStart,
+                tool: event.name || "unknown",
+                input: event.data.input,
+              });
             } else if (event.event === "on_tool_end") {
-                const toolMsg = new ToolMessage(event.data.output)
-                await sendSSEMessage(writer, {
-                    type: StreamMessageType.ToolEnd,
-                    tool: toolMsg.lc_kwargs.name || "unknown",
-                    output: event.data.output,
-                })
+              const toolMsg = new ToolMessage(event.data.output);
+              await sendSSEMessage(writer, {
+                type: StreamMessageType.ToolEnd,
+                tool: toolMsg.lc_kwargs.name || "unknown",
+                output: event.data.output,
+              });
             }
 
             await sendSSEMessage(writer, { type: StreamMessageType.Done });
@@ -105,6 +105,12 @@ export async function POST(req: Request) {
         }
       } catch (error) {
         return new Response(JSON.stringify({ error: error }), { status: 500 });
+      } finally {
+        try {
+          await writer.close();
+        } catch (error) {
+          console.error("Error closing SSE stream", error);
+        }
       }
     })();
 
