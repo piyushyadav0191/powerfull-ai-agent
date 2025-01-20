@@ -29,8 +29,12 @@ export function ChatRow({
       <div className="p-4">
         <div className="flex justify-between items-start">
           Chat
-          <Button variant={"ghost"} size={"icon"}>
-            <TrashIcon size={20} onClick={() => onDelete(chat._id)} />
+          <Button variant={"ghost"} size={"icon"} className="opacity-0 group-hover:opacity-100 -mr-2 ml-2 transition-opacity duration-200">
+            <TrashIcon size={20} onClick={(e) => {
+                e.stopPropagation();
+              onDelete(chat._id)
+            }
+               } />
           </Button>
         </div>
 
