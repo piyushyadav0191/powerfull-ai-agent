@@ -114,7 +114,9 @@ export async function submitQuestion(messages: BaseMessage[], chatId: string){
 
     const app = (await workflow).compile({checkpointer})
 
-    const stream = await app.streamEvents({messages}, {
+    console.log('messages', messages)
+
+    const stream =  app.streamEvents({messages}, {
         version: "v2",
         configurable: {
             thread_id: chatId
@@ -122,4 +124,6 @@ export async function submitQuestion(messages: BaseMessage[], chatId: string){
         streamMode: 'messages',
         runId: chatId
     })
+
+    return stream
 }
