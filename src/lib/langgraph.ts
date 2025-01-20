@@ -3,6 +3,7 @@ import { ToolNode } from "@langchain/langgraph/prebuilt";
 import wxClient from "@wxflows/sdk/langchain";
 import {
   END,
+  MemorySaver,
   MessagesAnnotation,
   START,
   StateGraph,
@@ -10,6 +11,7 @@ import {
 import { SYSTEM_MESSAGE } from "./constant";
 import {
   AIMessage,
+  BaseMessage,
   SystemMessage,
   trimMessages,
 } from "@langchain/core/messages";
@@ -17,6 +19,7 @@ import {
   ChatPromptTemplate,
   MessagesPlaceholder,
 } from "@langchain/core/prompts";
+import { threadId } from "worker_threads";
 
 const trimmer = trimMessages({
   maxTokens: 10,
@@ -104,3 +107,19 @@ const createWorkflow = async () => {
 
   return stateGraph;
 };
+
+export async function submitQuestion(messages: BaseMessage[], chatId: string){
+    const workflow = createWorkflow()
+    const checkpointer = new MemorySaver()
+
+    const app = (await workflow).compile({checkpointer})
+
+    const stream = await app.streamEvents({messages}, {
+        version: "v2",
+        configurable: {
+            thread_id: chatId
+        },
+        streamMode: 'messages',
+        runId: chatId
+    })
+}
