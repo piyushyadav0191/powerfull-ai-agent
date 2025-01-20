@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Doc, Id } from "../../convex/_generated/dataModel";
 import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
-import { ChatRequestBody } from "@/lib/type";
+import { ChatRequestBody, StreamMessageType } from "@/lib/type";
+import { createSSEParser } from "@/lib/createSSEparser";
 
 interface ChatInterfaceProps {
   chatId: Id<"chats">;
@@ -21,6 +22,24 @@ const ChatInterface = ({ chatId, initialMessages }: ChatInterfaceProps) => {
     input: unknown;
   } | null>(null);
   const messageEndRef = useRef<HTMLDivElement>(null);
+
+  const processStream = async (reader: ReadableStreamDefaultReader<Uint8Array>, onChunk: (chunk: string) => Promise<void>) => {
+
+      try {
+        while(true){
+            const {done, value} = await reader.read()
+            if(done) break
+            const chunk = new TextDecoder().decode(value)
+            await onChunk(chunk)
+        }
+      } catch (error) {
+          console.error(error); 
+      } finally {
+        reader.releaseLock()
+      }
+
+  }
+
 
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -76,6 +95,33 @@ const ChatInterface = ({ chatId, initialMessages }: ChatInterfaceProps) => {
         }
 
         // handling streaming
+
+        const parser = createSSEParser()
+        const reader = response.body.getReader()
+
+        await processStream(reader, async (chunk) => {
+          const messages = parser.parse(chunk)
+          for (const message of messages){
+            switch(message.type){
+              case StreamMessageType.Token:
+                if("token" in message){
+                  fullResponse += message.token
+                  setStreamedResponse(fullResponse)
+                }
+                break
+
+                case StreamMessageType.ToolStart:
+                  if("tool" in message){
+                    setCurrentTool({
+                      name: message.tool,
+                      input: message.input
+                    })
+
+                    // format terminal output
+                  }
+            }
+          }
+        })
 
 
     } catch (error) {
