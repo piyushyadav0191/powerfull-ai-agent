@@ -1,6 +1,8 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import {ToolNode} from "@langchain/langgraph/prebuilt"
 import wxClient from "@wxflows/sdk/langchain"
+import {END, MessagesAnnotation, START, StateGraph} from  "@langchain/langgraph"
+import { SYSTEM_MESSAGE } from "./constant";
 
 const toolClient = new wxClient({
     apikey: process.env.WX_API_KEY,
@@ -32,6 +34,18 @@ const initializeModel = () => {
             }
         }
       ]
-    });
+    }).bindTools(tools);
     return AImodel;
+}
+
+const createWorkflow = async () => {
+    const model = initializeModel()
+  const stateGraph = new StateGraph(MessagesAnnotation).addNode("agent", async (state) => {
+    const systemContent = SYSTEM_MESSAGE
+
+    
+
+  })
+
+  
 }
