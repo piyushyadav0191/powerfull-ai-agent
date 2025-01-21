@@ -55,23 +55,31 @@ const ChatInterface = ({ chatId, initialMessages }: ChatInterfaceProps) => {
     return `---START---\n${terminalHtml}\n---END---\n`;
   };
 
-  const processStream = async (
-    reader: ReadableStreamDefaultReader<Uint8Array>,
-    onChunk: (chunk: string) => Promise<void>
-  ) => {
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = new TextDecoder().decode(value);
-        await onChunk(chunk);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      reader.releaseLock();
-    }
-  };
+ const processStream = async (
+   reader: ReadableStreamDefaultReader<Uint8Array>,
+   onChunk: (chunk: string) => Promise<void>
+ ) => {
+   try {
+     const parser = createSSEParser();
+     while (true) {
+       const { done, value } = await reader.read();
+       if (done) break;
+
+       const chunk = new TextDecoder().decode(value);
+       const messages = parser.parse(chunk);
+
+       for (const message of messages) {
+         if (message.type === StreamMessageType.Token) {
+           setStreamedResponse((prev) => prev + message.token);
+         }
+       }
+     }
+   } catch (error) {
+     console.error("Stream processing error:", error);
+   } finally {
+     reader.releaseLock();
+   }
+ };
 
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -123,7 +131,11 @@ const ChatInterface = ({ chatId, initialMessages }: ChatInterfaceProps) => {
       }
 
       if (!response.ok) {
-        throw new Error("Response is not ok");
+       const errorData = await response.json();
+       console.error("Response error:", errorData);
+       throw new Error(
+         `Response error: ${errorData.error || response.statusText}`
+       );
       }
 
       // handling streaming
@@ -210,7 +222,11 @@ const ChatInterface = ({ chatId, initialMessages }: ChatInterfaceProps) => {
         prev.filter((msg) => msg._id !== optimisticUserMessage._id)
       );
 
-      setStreamedResponse("An error occurred. Please try again.");
+     console.error("Detailed chat error:", error);
+     setStreamedResponse(
+       `Error: ${error || "An unexpected error occurred"}`
+     );
+     setLoading(false);
     } finally {
       setLoading(false);
     }

@@ -51,12 +51,18 @@ const initializeModel = () => {
         handleLLMStart: async () => {
           console.log("LLM started");
         },
+        handleLLMNewToken: async (token) => {
+          console.log("New token:", token); // Add token logging
+        },
         handleLLMEnd: async (output) => {
           console.log("LLM ended", output);
           const usage = output.llmOutput?.usage;
           if (usage) {
             console.log("Usage:", usage);
           }
+        },
+        handleLLMError: async (error) => {
+          console.error("LLM error:", error); // Add error logging
         },
       },
     ],

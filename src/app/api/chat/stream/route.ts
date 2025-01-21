@@ -64,17 +64,19 @@ export async function POST(req: Request) {
           const eventStream = await submitQuestion(langchainMessages, chatId);
 
           for await (const event of eventStream) {
+             console.log("Received event:", event);
             if (event.event === "on_chat_model_stream") {
               const token = event.data.chunk;
-
-              if (token) {
-                const text = token.content.at(0)?.["text"];
-                if (text) {
-                  await sendSSEMessage(writer, {
-                    type: StreamMessageType.Token,
-                    token: text,
-                  });
-                }
+              console.log("Token received:", token); 
+if (token) {
+    const text = token.content;
+    if (text) {
+      await sendSSEMessage(writer, {
+        type: StreamMessageType.Token,
+        token: text,
+      });
+    }
+  
               }
             } else if (event.event === "on_tool_start") {
               await sendSSEMessage(writer, {
