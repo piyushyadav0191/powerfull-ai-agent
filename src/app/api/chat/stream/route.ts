@@ -91,8 +91,8 @@ export async function POST(req: Request) {
               });
             }
 
-            await sendSSEMessage(writer, { type: StreamMessageType.Done });
           }
+          await sendSSEMessage(writer, { type: StreamMessageType.Done });
         } catch (streamError) {
           console.error("Stream error", streamError);
           await sendSSEMessage(writer, {

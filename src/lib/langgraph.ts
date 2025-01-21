@@ -45,7 +45,7 @@ const initializeModel = () => {
     temperature: 0.7,
     maxOutputTokens: 4096,
     streaming: true,
-    cache: true,
+    // cache: true,
     callbacks: [
       {
         handleLLMStart: async () => {
